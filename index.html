@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+    <head>
+        <title>ChatApp</title>
+        <style>
+            body {
+                direction: rtl;
+            }
+            .chat {
+                max-width: 300px;
+            }
+            .user-input {
+                width: 100%;
+                padding: 10px;
+                border: 2px solid grey;
+                border-bottom-width: 0;
+            }
+            .messages {
+                width: 100%;
+                border: 2px solid grey;
+                height: 425px;
+                padding: 10px;
+                border-bottom-width: 0;
+            }
+            .text-input {
+                width: 100%;
+                max-width: 100%;
+                padding: 10px;
+                border: 2px solid grey;
+                border-top-width: 0;
+                
+            }
+            .message {
+                margin-bottom: 10px;
+            }
+            #isTyping {
+                width: 100%;
+                padding: 10px;
+                height: 20px;
+                border: 2px solid grey;
+                border-top-width:0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="chat">
+            <input type="text" class="user-input" placeholder="Enter your name ..." />
+            <div class="messages"></div>
+            <div id="isTyping"></div>
+            <textarea class="text-input" placeholder="Enter message text ..."></textarea>
+            <input type="button" id="sendBtn" value="Send"></input>
+        </div>
+        <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            var socket = io();
+            $('#sendBtn').on('click', function() {
+                socket.emit('message', {user: $('.user-input').val(), text: $('.text-input').val()});
+                $('.text-input').val('');
+            })
+            $('.text-input').on('focus', function() {
+                socket.emit('type', $('.user-input').val())
+            })
+            $('.text-input').on('blur', function() {
+                socket.emit('type', '')
+            })
+            socket.on('message', function(msg) {
+                var user_color = msg.user == $('.user-input').val()? 'red' : 'black';
+                $('.messages').append('<div class="message"><span style="color:' + user_color + ';">' + msg.user + '</span>: ' + msg.text + '</div>')
+            })
+            socket.on('type', function(user) {
+                if(!user) {
+                    $('#isTyping').html('');
+                    return;
+                }
+                $('#isTyping').html(user + ' داره می نویسه')
+            })
+        </script>
+    </body>
+</html>
